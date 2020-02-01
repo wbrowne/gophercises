@@ -41,7 +41,6 @@ func main() {
 		log.Print(problem.question)
 
 		userInput := getUserInput(reader)
-		userInput = strings.TrimRight(userInput, "\n")
 		if userInput == problem.answer {
 			numCorrect++
 		}
@@ -52,12 +51,12 @@ func main() {
 
 func getUserInput(reader *bufio.Reader) string {
 	for {
-		result, err := reader.ReadString('\n')
+		input, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		return result
+		return strings.TrimRight(input, "\n")
 	}
 }
 
