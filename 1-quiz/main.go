@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +25,9 @@ type Problem struct {
 }
 
 func main() {
-	problems, err := getProblemsFromCsv(CsvFilename)
+	problemsFilePtr := flag.String("f", "problems.csv", "a CSV file of problems")
+	flag.Parse()
+	problems, err := getProblemsFromCsv(*problemsFilePtr)
 
 	if len(problems) > MaxProblems {
 		log.Printf("That's too many problems! Try less than %d\n", MaxProblems)
@@ -32,7 +35,7 @@ func main() {
 	}
 
 	if err != nil {
-		log.Println("Error:", err)
+		log.Fatal(err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
