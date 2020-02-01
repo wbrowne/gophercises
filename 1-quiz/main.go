@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -27,8 +28,9 @@ type Problem struct {
 }
 
 func main() {
-	problemsFilePtr := flag.String("f", CsvFilename, "a CSV file of problems")
-	timeoutPtr := flag.Int("t", TimeoutInSeconds, "a problem timeout value")
+	problemsFilePtr := flag.String("f", CsvFilename, "a CSV file of problems with format <question>,<answer>")
+	timeoutPtr := flag.Int("t", TimeoutInSeconds, "quiz timeout value")
+	shufflePtr := flag.Bool("s", true, "shuffle order of problems")
 	flag.Parse()
 
 	problems, err := getProblemsFromCsv(*problemsFilePtr)
@@ -40,6 +42,10 @@ func main() {
 	if len(problems) > MaxProblems {
 		log.Printf("That's too many problems! Try less than %d\n", MaxProblems)
 		return
+	}
+
+	if *shufflePtr {
+		problems = shuffle(problems)
 	}
 
 	log.Println("Hit enter to start")
@@ -67,6 +73,13 @@ func main() {
 	log.Printf("You answered %d/%d correctly", numCorrect, len(problems))
 }
 
+func shuffle(p []Problem) []Problem {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(p), func(i, j int) { p[i], p[j] = p[j], p[i] })
+
+	return p
+}
+
 func getUserInput(input chan string) {
 	reader := bufio.NewReader(os.Stdin)
 	result, err := reader.ReadString('\n')
@@ -74,7 +87,13 @@ func getUserInput(input chan string) {
 		log.Fatal(err)
 	}
 
-	input <- strings.TrimRight(result, "\n")
+	input <- normalizeString(result)
+}
+
+func normalizeString(s string) string {
+	s = strings.ToLower(s)
+	s = strings.TrimSpace(s)
+	return s
 }
 
 func getProblemsFromCsv(filename string) ([]Problem, error) {
@@ -91,7 +110,7 @@ func getProblemsFromCsv(filename string) ([]Problem, error) {
 
 	var problems []Problem
 	for _, row := range rows {
-		problems = append(problems, Problem{question: row[0], answer: row[1]})
+		problems = append(problems, Problem{question: row[0], answer: normalizeString(row[1])})
 	}
 
 	return problems, nil
