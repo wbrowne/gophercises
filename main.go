@@ -14,7 +14,6 @@ import (
 
 const (
 	CsvFilename      = "problems.csv"
-	MaxProblems      = 100
 	TimeoutInSeconds = 30
 )
 
@@ -37,11 +36,6 @@ func main() {
 
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if len(problems) > MaxProblems {
-		log.Printf("That's too many problems! Try less than %d\n", MaxProblems)
-		return
 	}
 
 	if *shufflePtr {
